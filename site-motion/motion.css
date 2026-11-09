@@ -1,0 +1,49 @@
+/* Inner-page motion (web/site-motion/). Prefix "sm" = site motion. Colours come from the tokens in
+   ../styles/main.css. Nothing here changes layout; it only sets start states and decorative layers. */
+
+/* Start states. .sm-js is set by the head snippet before the first paint, so animated items never
+   flash in their final state and then jump back. .sm-failed (set after a few seconds if the script
+   never started) and a page without JavaScript show everything as plain text. */
+.sm-js:not(.sm-failed) :is(
+  [data-reveal],
+  [data-kinetic],
+  [data-counter],
+  [data-stagger] > *,
+  [data-reveal-group] > :not(section),
+  [data-reveal-group] > section > *
+) { opacity: 0; }
+
+/* Kinetic text (SplitText masks): room for descenders inside the clip. */
+[data-kinetic] .word-mask, [data-kinetic] .char-mask { padding-bottom: 0.12em; margin-bottom: -0.12em; }
+
+/* Counters change their text while counting; tabular figures keep the width still. */
+[data-counter] { font-variant-numeric: tabular-nums; }
+
+/* Page wipe: charcoal with a red leading edge, as on the homepage. Parked invisible until used. */
+.sm-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--kef-black, #191919);
+  opacity: 0;
+  pointer-events: none;
+}
+.sm-wipe::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  background: var(--kef-red);
+}
+.sm-arriving .sm-wipe { opacity: 1; }
+@media (max-width: 767px) {
+  .sm-wipe::after { top: 0; bottom: auto; left: 0; right: 0; width: auto; height: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sm-wipe::after { display: none; }
+}
+
+/* 3D product hero: a soft studio backdrop; the canvas fades in on top once the model is built. */
+.sm-product__canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
