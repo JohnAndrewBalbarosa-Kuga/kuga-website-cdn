@@ -445,6 +445,7 @@ body {
 }
 .kef-award-focus__backdrop { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(10px); }
 .kef-award-focus__figure { position: relative; margin: 0; display: grid; justify-items: center; gap: 1.25rem; padding: 0 16px; text-align: center; }
+.kef-award-focus__figure:focus { outline: none; } /* focused on open for screen readers; no box (Webflow adds a focus outline) */
 .kef-award-focus__badge { width: min(62vmin, 520px); transform-origin: 0 0; }
 .kef-award-focus__badge img { display: block; width: 100%; height: auto; }
 .kef-award-focus__caption { display: grid; gap: 0.25rem; color: var(--kef-charcoal); }
