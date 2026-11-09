@@ -1,0 +1,504 @@
+/* Kuga Energy field: colour tokens and layout. Class prefix "kef" = Kuga Energy Field. */
+
+:root {
+  --kef-red: #DC0000;
+  --kef-red-hover: #EE0000;
+  --kef-white: #FFFFFF;
+  --kef-light-grey: #F5F5F5;
+  --kef-charcoal: #313131;
+  --kef-text-muted: rgba(49, 49, 49, 0.75);
+  --kef-panel: rgba(255, 255, 255, 0.85);
+  --kef-font: "Suisse Int'l", Inter, "Helvetica Neue", Arial, sans-serif;
+  --kef-gutter: clamp(16px, 4vw, 64px);
+}
+
+/* Lenis smooth scroll helpers */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+html { background: var(--kef-white); }
+
+body {
+  margin: 0;
+  background: var(--kef-white);
+  color: var(--kef-charcoal);
+  font-family: var(--kef-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+.kef { position: relative; overflow-x: clip; }
+
+/* Fixed full-screen canvas behind the story */
+.kef-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 60% 40%, var(--kef-white) 0%, var(--kef-light-grey) 75%);
+}
+.kef-canvas canvas { display: block; width: 100%; height: 100%; }
+
+.kef-story { position: relative; z-index: 1; }
+
+/* Scenes */
+.kef-scene { position: relative; min-height: 100vh; }
+.kef-scene--tall { min-height: 170vh; }
+
+.kef-scene__inner {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: var(--kef-gutter);
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  align-items: center;
+  gap: 2rem;
+}
+
+.kef-copy { max-width: 30rem; }
+
+.kef-eyebrow {
+  margin: 0 0 0.75rem;
+  color: var(--kef-red);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  font-size: 0.875rem;
+}
+
+.kef-headline {
+  margin: 0 0 1rem;
+  font-weight: 600;
+  font-size: clamp(2rem, 4.5vw, 3.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.kef-text {
+  margin: 0 0 1.5rem;
+  color: var(--kef-text-muted);
+  font-size: clamp(1rem, 1.3vw, 1.2rem);
+  line-height: 1.5;
+}
+
+.kef-signoff { margin: 2rem 0 0; font-weight: 600; color: var(--kef-red); }
+
+/* Buttons */
+.kef-button {
+  display: inline-block;
+  padding: 1rem 2.25rem;
+  border-radius: 999px;
+  background: var(--kef-red);
+  color: var(--kef-white);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.kef-button:hover { background: var(--kef-red-hover); transform: translateY(-1px); }
+.kef-button:focus-visible { outline: 2px solid var(--kef-charcoal); outline-offset: 4px; }
+.kef-button--ghost { background: transparent; color: var(--kef-charcoal); border: 1px solid rgba(49, 49, 49, 0.4); }
+.kef-button--ghost:hover { color: var(--kef-white); }
+.kef-button--ghost:hover { background: var(--kef-red-hover); border-color: var(--kef-red-hover); }
+
+/* Hero: word in the middle, copy along the bottom */
+.kef-scene--hero .kef-scene__inner {
+  grid-template-columns: 1fr;
+  align-items: end;
+  justify-items: center;
+  text-align: center;
+  padding-bottom: 8vh;
+}
+
+/* Quote: centred button for particles to gather round */
+.kef-scene--quote .kef-scene__inner {
+  position: relative;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+.kef-scene--quote .kef-button { font-size: 1.25rem; padding: 1.25rem 3rem; }
+.kef--directed .kef-scene--quote .kef-button { margin-top: 4.5rem; } /* room for the particle ring round the button */
+
+/* Spec callouts beside the product */
+.kef-callouts {
+  grid-column: 2;
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: min(14rem, 100%);
+  margin: 0;
+}
+
+.kef-callout {
+  padding: 0.6rem 0.9rem;
+  border-left: 2px solid var(--kef-red);
+  background: var(--kef-panel);
+  box-shadow: 0 4px 16px rgba(49, 49, 49, 0.08);
+  backdrop-filter: blur(6px);
+}
+.kef-callout dt { font-size: 0.8rem; color: var(--kef-text-muted); }
+.kef-callout dd { margin: 0.2rem 0 0; font-size: 1.25rem; font-weight: 600; }
+
+/* Callouts are only hidden once the script is running, so text never goes missing.
+   They leave quickly and all together, and come in one after another. */
+.kef--ready [data-callout] {
+  opacity: 0;
+  transform: translateX(16px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.kef--ready .is-active [data-callout] {
+  opacity: 1;
+  transform: none;
+  transition-duration: 0.5s;
+  transition-delay: calc(var(--callout-index, 0) * 120ms);
+}
+/* Product scenes: callouts only inside the hold phase window (data-callouts is set by the overlay
+   controller from CALLOUTS.window), so they are fully in while the model holds and gone before it shatters. */
+.kef--ready .is-active[data-phase]:not([data-callouts="on"]) [data-callout] {
+  opacity: 0;
+  transform: translateX(16px);
+  transition-duration: 0.25s;
+  transition-delay: 0s;
+}
+
+/* Phone width: product sits in the top half, copy and callouts below */
+@media (max-width: 767px) {
+  .kef-scene__inner {
+    grid-template-columns: 1fr;
+    align-content: end;
+    gap: 1rem;
+    padding-bottom: 2.5rem;
+  }
+  .kef-callouts {
+    grid-column: 1;
+    justify-self: start;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: auto;
+    gap: 0.5rem;
+  }
+  .kef-callout dd { font-size: 1rem; }
+  .kef--ready [data-callout],
+  .kef--ready .is-active[data-phase]:not([data-callouts="on"]) [data-callout] { transform: translateY(8px); }
+  .kef-scene--quote .kef-scene__inner { align-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kef--ready [data-callout], .kef-button { transition: none; }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Film mode (director-controller.js). .kef--directed is only set while the director runs with
+   full motion; .kef--still with reduced motion. Without the script the page above still reads.
+   --------------------------------------------------------------------------------------------- */
+
+:root {
+  --kef-black: #191919; /* brand Matt Black: letterbox bars, wipes, cold open */
+  --kef-bar: max(7vh, 60px); /* letterbox bar height; also the space kept free for it */
+}
+
+/* The WebGL canvas sits above the cold-open grade inside the canvas holder. */
+.kef-canvas canvas { position: relative; z-index: 1; }
+
+/* Shots: each section is scroll length only; its first child is a fixed, full-screen shot. */
+.kef--directed .kef-scene { min-height: 0; height: var(--kef-shot-length, 100vh); }
+.kef--directed .kef-scene__inner {
+  position: fixed;
+  inset: 0;
+  min-height: 0;
+  height: 100%;
+  visibility: hidden;
+  padding-top: calc(var(--kef-bar) + var(--kef-gutter));
+  padding-bottom: calc(var(--kef-bar) + var(--kef-gutter));
+}
+.kef--directed .kef-scene--hero .kef-scene__inner { padding-bottom: calc(var(--kef-bar) + 5vh); }
+.kef--directed .kef-scene--dark { color: var(--kef-white); }
+.kef--directed .kef-headline { font-size: clamp(2.25rem, 4.6vw, 4.5rem); letter-spacing: -0.03em; }
+.kef--directed .kef-copy { max-width: 34rem; }
+/* Light scenes full of flowing particles: a soft white halo keeps the copy readable. */
+.kef--directed [data-shape="flow"]:not(.kef-scene--dark) .kef-copy { text-shadow: 0 0 18px rgba(255, 255, 255, 0.95), 0 0 4px rgba(255, 255, 255, 0.9); }
+
+/* Kinetic text (SplitText masks): room for descenders inside the clip. */
+.kef .word-mask, .kef .char-mask { padding-bottom: 0.12em; margin-bottom: -0.12em; }
+
+/* Copy variants */
+.kef-copy--centred { grid-column: 1 / -1; justify-self: center; text-align: center; }
+.kef--directed .kef-copy--centred { max-width: 64rem; }
+.kef--directed .kef-copy--hero { max-width: 56rem; }
+.kef--directed .kef-scene--hero .kef-headline { font-size: clamp(2rem, 4.2vw, 3.75rem); }
+.kef-copy--wide { grid-column: 1 / -1; }
+.kef--directed .kef-copy--wide { max-width: 72rem; }
+.kef .kef-headline--display { font-size: clamp(2.5rem, 7vw, 7.5rem); line-height: 1; letter-spacing: -0.04em; margin: 0; }
+
+/* Cold-open grade: dark layer, rising warm glow and a light band. Animated by the director. */
+.kef-grade { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.kef-grade__dark,
+.kef-grade__sun,
+.kef-grade__sweep { position: absolute; opacity: 0; visibility: hidden; }
+.kef-grade__dark { inset: 0; background: radial-gradient(ellipse at 50% 65%, #2A2A2A 0%, var(--kef-black) 70%); }
+.kef-grade__sun {
+  left: 50%;
+  top: 60%;
+  width: 150vmax;
+  height: 150vmax;
+  margin: -75vmax 0 0 -75vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFFCF7 0%, rgba(255, 226, 210, 0.7) 22%, rgba(220, 0, 0, 0.08) 42%, rgba(255, 255, 255, 0) 62%);
+}
+.kef-grade__sweep {
+  top: 0;
+  bottom: 0;
+  left: 20%;
+  width: 60%;
+  opacity: 1;
+  visibility: visible;
+  background: linear-gradient(105deg, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.55) 50%, rgba(255, 255, 255, 0) 80%);
+}
+
+/* Letterbox bars */
+.kef-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 2; /* above the shots, below the counter */
+  height: var(--kef-bar);
+  background: var(--kef-black);
+  transform: scaleY(0);
+  pointer-events: none;
+}
+.kef-bar--top { top: 0; transform-origin: 50% 0; }
+.kef-bar--bottom { bottom: 0; transform-origin: 50% 100%; }
+
+/* Montage flash frame and chapter wipes */
+.kef-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  background: var(--kef-black); /* a dip through black reads on the light scenes */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.kef-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  background: var(--kef-black);
+  pointer-events: none;
+}
+/* Skip dissolve (scroll-smoother.js): the page colour covers a fast jump across several shots. */
+.kef-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 4; /* above the shots and wipes, below the top nav */
+  background: var(--kef-light-grey);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.kef-wipe::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  background: var(--kef-red);
+}
+
+/* Chapter counter, in the bottom bar */
+.kef-counter { display: none; }
+.kef--directed .kef-counter,
+.kef--still .kef-counter {
+  position: fixed;
+  left: var(--kef-gutter);
+  bottom: 0;
+  z-index: 3;
+  height: var(--kef-bar);
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--kef-charcoal);
+  pointer-events: none;
+  transition: color 0.6s ease;
+}
+.kef--letterbox .kef-counter { color: var(--kef-white); }
+.kef-counter__index { margin: 0; display: flex; gap: 0.35rem; overflow: hidden; font-weight: 600; font-variant-numeric: tabular-nums; }
+.kef-counter__number { display: inline-block; color: var(--kef-red); }
+.kef-counter__total { opacity: 0.6; }
+.kef-counter__track { position: relative; width: 4rem; height: 2px; background: rgba(49, 49, 49, 0.2); overflow: hidden; }
+.kef--letterbox .kef-counter__track { background: rgba(255, 255, 255, 0.25); }
+.kef-counter__progress { position: absolute; inset: 0; background: var(--kef-red); transform: scaleX(0); transform-origin: 0 50%; }
+.kef-counter__names { display: grid; margin: 0; padding: 0; list-style: none; }
+.kef-counter__names li { grid-area: 1 / 1; opacity: 0; visibility: hidden; white-space: nowrap; }
+
+/* Proof: counters */
+.kef-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 1rem; margin: 2rem 0 0; }
+.kef-stat {
+  padding: 1.25rem 1.5rem;
+  background: var(--kef-panel);
+  border-top: 3px solid var(--kef-red);
+  box-shadow: 0 4px 16px rgba(49, 49, 49, 0.08);
+  backdrop-filter: blur(6px);
+}
+.kef-stat dt { font-size: 0.9rem; color: var(--kef-text-muted); }
+.kef-stat dd { margin: 0.5rem 0 0; }
+.kef-stat__value {
+  display: block;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.kef-stat__note { display: block; margin-top: 0.5rem; font-size: 0.8rem; color: var(--kef-text-muted); }
+
+/* End card */
+.kef-wordmark {
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: var(--kef-red);
+  font-size: clamp(4rem, 12vw, 10rem);
+}
+.kef-scene--quote .kef-signoff { margin: 0.75rem 0 2rem; font-size: clamp(1.25rem, 2.2vw, 2rem); color: var(--kef-charcoal); }
+.kef-endcard__title { margin: 0 0 0.5rem; font-size: clamp(1.1rem, 1.6vw, 1.4rem); font-weight: 600; }
+
+/* Reduced motion: ordinary sections, no sticky pin. */
+.kef--still .kef-scene,
+.kef--still .kef-scene--tall { min-height: 100vh; }
+.kef--still .kef-scene__inner { position: relative; }
+
+@media (max-width: 767px) {
+  .kef-stats { grid-template-columns: 1fr; gap: 0.6rem; margin-top: 1.25rem; }
+  .kef-stat { padding: 0.8rem 1rem; }
+  .kef-stat__value { font-size: 1.75rem; }
+  .kef--directed .kef-scene__inner { padding-bottom: calc(var(--kef-bar) + 1.25rem); }
+  /* phone wipes run bottom to top; the red edge leads on top */
+  .kef-wipe::after { top: 0; bottom: auto; left: 0; right: 0; width: auto; height: 8px; }
+  .kef-counter__track { width: 2.5rem; }
+}
+
+/* Recognition (chapter 7, shot 1): award badges centred, newest first; the 2023 row underneath.
+   Each badge is a button: award-focus-controller.js grows it to fill the view. */
+.kef--directed .kef-copy.kef-recognition { max-width: 72rem; width: 100%; }
+.kef--directed .kef-scene--recognition .kef-headline { font-size: clamp(2rem, 3.6vw, 3.4rem); }
+.kef-scene--recognition .kef-copy { text-shadow: none !important; }
+.kef-scene--recognition ul { list-style: none; margin: 0; padding: 0; }
+.kef-recognition__hint { margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--kef-text-muted); }
+
+.kef-badges { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: clamp(0.75rem, 2vw, 1.75rem); margin: 1.5rem 0 0 !important; }
+.kef-badges--2023 { margin-top: clamp(0.75rem, 1.6vw, 1.25rem) !important; }
+.kef-badges__item { flex: 0 0 auto; }
+.kef-badge {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+.kef-badge:hover { transform: translateY(-3px) scale(1.04); }
+.kef-badge:focus-visible { outline: 2px solid var(--kef-red); outline-offset: 4px; }
+.kef-badge img { display: block; width: clamp(84px, 9vw, 136px); height: auto; filter: drop-shadow(0 6px 14px rgba(49, 49, 49, 0.16)); }
+/* 2023 medallions: the button (and the focus view's badge box) is the size container the medal's text scales with. */
+.kef-badges--2023 .kef-badge, .kef-award-focus__badge { container-type: inline-size; }
+.kef-badges--2023 .kef-badge { width: clamp(76px, 7.5vw, 112px); }
+
+/* 2023 medallion: a typographic stand-in (no official badge image exists). Sizes are in container
+   units of its box (above), so the enlarged copy stays in proportion. */
+.kef-medal {
+  width: 100%;
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4cqw;
+  padding: 14cqw;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #F1F1F1 60%, #E2E2E2 100%);
+  box-shadow: inset 0 0 0 3cqw var(--kef-charcoal), inset 0 0 0 5cqw #FFFFFF, inset 0 0 0 6cqw var(--kef-red), 0 6px 14px rgba(49, 49, 49, 0.16);
+  color: var(--kef-charcoal);
+  text-align: center;
+  line-height: 1.1;
+}
+.kef-medal__top { font-size: 9cqw; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--kef-red); }
+.kef-medal__title { font-size: 10.5cqw; font-weight: 600; }
+.kef-medal__by { font-size: 7.5cqw; letter-spacing: 0.04em; color: var(--kef-text-muted); }
+
+/* Focus view: the badge grown to fill the screen over a dimmed page. */
+.kef-award-focus {
+  position: fixed;
+  inset: 0;
+  z-index: 20; /* above the top nav */
+  display: grid;
+  place-items: center;
+  cursor: zoom-out;
+}
+.kef-award-focus__backdrop { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(10px); }
+.kef-award-focus__figure { position: relative; margin: 0; display: grid; justify-items: center; gap: 1.25rem; padding: 0 16px; text-align: center; }
+.kef-award-focus__badge { width: min(62vmin, 520px); transform-origin: 0 0; }
+.kef-award-focus__badge img { display: block; width: 100%; height: auto; }
+.kef-award-focus__caption { display: grid; gap: 0.25rem; color: var(--kef-charcoal); }
+.kef-award-focus__title { font-size: clamp(1.1rem, 2vw, 1.5rem); font-weight: 600; }
+.kef-award-focus__by { font-size: 0.9rem; color: var(--kef-text-muted); }
+.kef-award-focus__link { justify-self: center; margin-top: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--kef-red); }
+.kef-award-focus__link:focus-visible { outline: 2px solid var(--kef-red); outline-offset: 3px; }
+
+/* Latest news (chapter 7, shot 2): centred cards. */
+.kef--directed .kef-copy.kef-recognition__news { max-width: 44rem; width: 100%; text-align: left; }
+.kef-recognition__news .kef-eyebrow { text-align: center; }
+.kef--directed .kef-scene--news .kef-scene__inner { overflow: hidden; } /* news cards slide in from the right */
+.kef-news { display: grid; gap: 0.75rem; }
+.kef-news-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.9rem 1.1rem;
+  background: var(--kef-panel);
+  border-left: 3px solid var(--kef-red);
+  box-shadow: 0 4px 16px rgba(49, 49, 49, 0.08);
+  backdrop-filter: blur(6px);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.kef-news-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(49, 49, 49, 0.14); }
+.kef-news-card:focus-visible { outline: 2px solid var(--kef-red); outline-offset: 3px; }
+.kef-news-card__date { font-size: 0.75rem; letter-spacing: 0.04em; color: var(--kef-text-muted); }
+.kef-news-card__title { font-weight: 600; font-size: 1rem; line-height: 1.3; }
+.kef-news-card__summary {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--kef-text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .kef--directed .kef-scene--recognition .kef-headline { font-size: 1.9rem; margin-bottom: 0; }
+  .kef-recognition__hint { font-size: 0.75rem; }
+  .kef-badges { gap: 0.5rem; margin-top: 0.9rem !important; }
+  .kef-badge img { width: 60px; }
+  .kef-badges--2023 .kef-badge { width: 58px; }
+  .kef-award-focus__badge { width: min(78vw, 360px); }
+  .kef-news { gap: 0.45rem; }
+  .kef-news-card { padding: 0.55rem 0.8rem; gap: 0.15rem; }
+  .kef-news-card__title { font-size: 0.85rem; }
+  .kef-news-card__summary { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kef-badge, .kef-news-card { transition: none; }
+  .kef-badge:hover { transform: none; }
+}

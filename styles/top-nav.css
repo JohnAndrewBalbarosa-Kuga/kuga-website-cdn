@@ -1,0 +1,22 @@
+/* Top nav overlay on the 3D homepage: links into the static pages. Above the fixed canvas, no effect on the scene. */
+.kef-topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.9rem var(--kef-gutter);
+  background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(49, 49, 49, 0.08);
+}
+.kef-topnav__logo { font-weight: 800; letter-spacing: 0.08em; color: var(--kef-red); text-decoration: none; font-size: 1.25rem; }
+.kef-topnav__links { display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: 0.9rem; }
+.kef-topnav__links a { color: var(--kef-charcoal); text-decoration: none; }
+.kef-topnav__links a:hover { color: var(--kef-red); }
+.kef-topnav__cta { padding: 0.6rem 1.3rem; font-size: 0.9rem; }
+
+@media (max-width: 767px) {
+  .kef-topnav__links { gap: 0.75rem; font-size: 0.8rem; }
+  .kef-topnav__links a:nth-child(n+4) { display: none; }
+  .kef-topnav__cta { display: none; }
+}
+
+/* The nav always stays visible and solid, also during letterbox chapters (it sits above the black top bar). */
+.kef-topnav { z-index: 10; background: rgba(255, 255, 255, 0.92); }
